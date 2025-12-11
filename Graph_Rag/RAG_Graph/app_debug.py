@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
-import sys # <-- Must be imported here
+import sys
 
 # Load environment variables (Moved up for immediate availability)
 env_path = os.path.join(os.path.dirname(__file__), 'Model', '.env')
@@ -37,7 +37,7 @@ print(f"   NEO4J_USERNAME: {neo4j_user}")
 print(f"   GEMINI_API_KEY: {'SET' if gemini_key != 'NOT SET' else 'NOT SET'}")
 
 if neo4j_uri == "NOT SET" or gemini_key == "NOT SET":
-    print("\n⚠️  WARNING: Some required environment variables are not set!")
+    print("\n  WARNING: Some required environment variables are not set!")
     print("   Please configure RAG_Graph/Model/.env file")
 
 print("\n2. Testing imports...")
@@ -51,11 +51,11 @@ try:
         client,
         system_prompt
     )
-    print("   ✅ Successfully imported RAG functions")
+    print("   Successfully imported RAG functions")
 except ImportError as e:
     print(f"   ❌ Import error: {e}")
 except Exception as e:
-    print(f"   ⚠️  Initialization error (may be expected): {e}")
+    print(f"     Initialization error (may be expected): {e}")
 
 print("\n3. Starting Flask server...")
 print("=" * 60)
@@ -75,11 +75,10 @@ def handle_query():
         if not user_query:
             return jsonify({"error": "Query parameter is required"}), 400
         
-        print(f"\n📝 Processing query: {user_query}")
+        print(f"\n Processing query: {user_query}")
         
-        # Step 1: Generate Cypher query
+        #  Generate Cypher query
         print("   → Generating Cypher query...")
-        # Corrected (Passing the client):
 cypher_query = generate_cypher_query_gemini(system_prompt, user_query)
         
         if not cypher_query:
@@ -88,17 +87,17 @@ cypher_query = generate_cypher_query_gemini(system_prompt, user_query)
                 "final_answer": "Failed to generate Cypher query."
             }), 500
         
-        print(f"   ✅ Cypher: {cypher_query[:100]}...")
+        print(f"   Cypher: {cypher_query[:100]}...")
         
-        # Step 2: Execute Cypher query
+        # Execute Cypher query
         print("   → Executing Cypher query...")
         retrieved_data = execute_cypher_query(driver, cypher_query)
-        print(f"   ✅ Retrieved data: {retrieved_data[:100]}...")
+        print(f"    Retrieved data: {retrieved_data[:100]}...")
         
-        # Step 3: Generate final answer
+        #  Generate final answer
         print("   → Generating final answer...")
         final_answer = generate_final_answer(client, user_query, retrieved_data)
-        print(f"   ✅ Answer: {final_answer[:100]}...")
+        print(f"   Answer: {final_answer[:100]}...")
         
         return jsonify({
             "cypher_query": cypher_query,
@@ -107,7 +106,7 @@ cypher_query = generate_cypher_query_gemini(system_prompt, user_query)
         
     except Exception as e:
         error_msg = str(e)
-        print(f"   ❌ Error: {error_msg}")
+        print(f"    Error: {error_msg}")
         import traceback
         traceback.print_exc()
         return jsonify({
@@ -118,8 +117,8 @@ cypher_query = generate_cypher_query_gemini(system_prompt, user_query)
 
 if __name__ == '__main__':
     import sys
-    print(f"\n🚀 Backend running on http://localhost:5000")
+    print(f"\n Backend running on http://localhost:5000")
     print(f"📍 Test health: curl http://localhost:5000/health")
-    print(f"📝 Test query: curl -X POST http://localhost:5000/api/query")
+    print(f" Test query: curl -X POST http://localhost:5000/api/query")
     print("=" * 60 + "\n")
     app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
