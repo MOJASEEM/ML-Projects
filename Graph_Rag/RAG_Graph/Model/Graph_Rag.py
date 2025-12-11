@@ -8,10 +8,7 @@ import pandas as pd
 # Load environment variables (but avoid side-effects on import)
 load_dotenv()
 
-# Default: don't perform heavy I/O or network ops at import time.
-# If the caller wants to load data, they should call `load_initial_data`.
 
-# Helper: path to CSV used by loader if invoked manually
 DEFAULT_CSV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Dataset', 'stock_data_aug_2025.csv'))
 # Create a function to generate the Cypher query for a single row
 def generate_merge_cypher(row):
@@ -19,7 +16,6 @@ def generate_merge_cypher(row):
     Generates a Cypher MERGE query string based on the values in a single row (Series).
     This function replaces the hardcoded cypher_create_query.
     """
-    # Note: Assuming 'row' is passed by df.apply(..., axis=1) as corrected earlier
     ticker = row.get('Ticker')
     date = str(row.get('Date'))
     open_price = row.get('Open Price')
@@ -35,10 +31,6 @@ def generate_merge_cypher(row):
     week_low = row.get('52 Week Low')
     sector = row.get('Sector')
     
-    # Use f-strings and triple quotes to build the multi-line query
-    # Ensure the closing triple quotes """ and the 'query = f"""' line
-    # are at the same, correct indentation level (8 spaces for the content
-    # inside the string is just for readability, but the key is consistency).
     # Build a safe Cypher MERGE statement (simple formatting)
     query = f"""
 MERGE (c:Company {{ticker: '{ticker}', name: '{ticker}', sector: '{sector}'}})
@@ -85,14 +77,14 @@ def load_initial_data(driver, dataframe=None, csv_path=None):
                 # Log and continue
                 print(f"Failed to execute merge for row {_}: {e}")
 
-# Neo4j driver: create driver object (but avoid heavy operations on import)
+# Neo4j driver: create driver object
 URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 AUTH = (os.getenv("NEO4J_USERNAME", "neo4j"), os.getenv("NEO4J_PASSWORD", "secret"))
 driver = None
 try:
     driver = GraphDatabase.driver(URI, auth=AUTH)
 except Exception as e:
-    print(f"❌ Could not create Neo4j driver: {e}")
+    print(f" Could not create Neo4j driver: {e}")
 
 # 1. Initialize the Gemini Client
 # Initialize the client using the environment variable
@@ -103,9 +95,9 @@ try:
     if GEMINI_KEY:
         client = genai.Client(api_key=GEMINI_KEY)
     else:
-        print("⚠️ GEMINI_API_KEY not set; LLM operations will be disabled.")
+        print(" GEMINI_API_KEY not set; LLM operations will be disabled.")
 except Exception as e:
-    print(f"❌ Failed to initialize Gemini Client: {e}")
+    print(f" Failed to initialize Gemini Client: {e}")
 
 # 2. Define the Query Generation Function for Gemini
 def generate_cypher_query_gemini(user_query, system_prompt):
@@ -119,11 +111,11 @@ def generate_cypher_query_gemini(user_query, system_prompt):
             print("generate_cypher_query_gemini: Gemini client not initialized")
             return None
         response = client.models.generate_content(
-            model='gemini-2.5-flash', # Fast, free-tier model
+            model='gemini-2.5-flash', 
             contents=prompt_messages,
             config=genai.types.GenerateContentConfig(
-                temperature=0.0, # Keep temperature low for deterministic query generation
-                system_instruction=system_prompt # Use system_instruction for clear context
+                temperature=0.0,
+                system_instruction=system_prompt 
             )
         )
         
@@ -136,7 +128,6 @@ def generate_cypher_query_gemini(user_query, system_prompt):
             if cypher_query.lower().startswith("cypher"):
                 cypher_query = cypher_query.split('\n', 1)[-1].strip()
         
-        # <--- CRITICAL FIX: Ensure correct spacing between Cypher clauses
         # Replace any newlines with a single space and strip extra whitespace
         cypher_query = cypher_query.replace('\n', ' ').strip()
         
@@ -146,10 +137,10 @@ def generate_cypher_query_gemini(user_query, system_prompt):
         return cypher_query
 
     except APIError as e:
-        #print(f"❌ Gemini API Error during query generation: {e}")
+        #print(f" Gemini API Error during query generation: {e}")
         return None
     except Exception as e:
-        #print(f"❌ An unexpected error occurred: {e}")
+        #print(f" An unexpected error occurred: {e}")
         return None
 system_prompt = """
 You are a Cypher query generator for a Neo4j graph database.
@@ -181,9 +172,7 @@ The graph schema includes the following node labels and relationship types:
 Example Query for "How is Apple performing?":
 MATCH (c:Company {ticker: 'AAPL'})-[:REPORTS_ON_DATE]->(m:StockMetric) RETURN m.date, m.close, m.volume ORDER BY m.date DESC LIMIT 1
 """
-# 3. Update the main workflow call
-# NOTE: The example/demo code below was moved under the standard
-# `if __name__ == '__main__':` guard to keep the module import-safe.
+
 def execute_cypher_query(driver, cypher_query):
     """
     Executes a Cypher query against the Neo4j database and formats the results 
@@ -218,9 +207,6 @@ def execute_cypher_query(driver, cypher_query):
         print(f"Neo4j Query Execution Error: {e}")
         return "No information was retrieved due to a database error."
 
-# ...
-# 4. Integrate this new function into your main script flow
-# ...
 
 # (Integration points are provided as functions; no work is performed at import time.)
 def generate_final_answer(client, user_question, context):
@@ -258,15 +244,12 @@ def generate_final_answer(client, user_question, context):
         return response.text.strip()
     
     except Exception as e:
-        return f"❌ Gemini API Error during final generation: {e}"
+        return f" Gemini API Error during final generation: {e}"
 
-# --- Update your main script flow (Example Integration) ---
-# ... (after cypher_query is executed and retrieved_data is generated) ...
 
-# 6. Generate the Final Answer using the RAG Context
+
 if __name__ == '__main__':
-    # Demo / CLI flow when executed directly
-    # Load CSV into DataFrame for demo (safe to do when running script)
+    # Load CSV into DataFrame for demo
     try:
         df = pd.read_csv(DEFAULT_CSV_PATH)
         print(df.head())
@@ -278,7 +261,7 @@ if __name__ == '__main__':
         if driver is not None:
             try:
                 driver.verify_connectivity()
-                print("✅ Neo4j connectivity verified.")
+                print(" Neo4j connectivity verified.")
             except Exception as e:
                 print(f"Warning: could not verify connectivity: {e}")
     except Exception:
