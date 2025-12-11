@@ -19,7 +19,7 @@ except ImportError as e:
 def test_query(query_text):
     print(f"\n--- Testing Query: '{query_text}' ---")
     
-    # 1. Generate Cypher
+    #  Generate Cypher
     cypher = generate_cypher_query_gemini(query_text, system_prompt)
     print(f"Generated Cypher:\n{cypher}")
     
@@ -27,12 +27,12 @@ def test_query(query_text):
         print("Failed to generate Cypher.")
         return
 
-    # 2. Execute Cypher
+    #  Execute Cypher
     print("Executing Cypher...")
     context = execute_cypher_query(driver, cypher)
     print(f"Retrieved Context:\n{context}")
 
-    # 3. Generate Answer
+    #  Generate Answer
     print("Generating Final Answer...")
     # Mock client if needed, but we should rely on the one imported
     from Graph_Rag import client
