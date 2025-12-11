@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphRAG Financial Query Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Financial Graph RAG Analyzer</h1>
+        <p>Ask a question about the stock data and get a grounded answer from the Neo4j graph.</p>
+
+        <div class="input-area">
+            <textarea id="prompt-input" placeholder="e.g., What was the dividend yield for Apple in the latest recorded metric?" rows="3"></textarea>
+            <button id="submit-button" onclick="processPrompt()">Get Answer</button>
+        </div>
+
+        <div id="loading-indicator" class="hidden">
+            <div class="spinner"></div>
+            <p>Processing request: Generating Cypher, fetching data, and synthesizing answer...</p>
+        </div>
+
+        <div class="output-sections" id="output-container" style="display: none;">
+            
+            <section>
+                <h2>User Prompt</h2>
+                <div id="user-prompt-output" class="output-box"></div>
+            </section>
+
+            <section>
+                <h2>Generated Cypher Query</h2>
+                <pre id="cypher-output" class="code-box"></pre>
+            </section>
+
+            <section>
+                <h2>Final Grounded Answer</h2>
+                <div id="final-answer-output" class="output-box final-answer"></div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
