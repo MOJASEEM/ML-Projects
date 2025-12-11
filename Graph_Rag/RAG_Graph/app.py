@@ -49,14 +49,14 @@ def handle_query():
         
 
     try:
-        # Step 1: Generate Cypher query from user prompt
+        #  Generate Cypher query from user prompt
         # This was missing in your original code and is required for the next step
         cypher_query = generate_cypher_query_gemini(user_query, system_prompt)
         
-        # Step 2: Execute Cypher query against Neo4j
+        # Execute Cypher query against Neo4j
         retrieved_data = execute_cypher_query(driver, cypher_query)
         
-        # Step 3: Generate final answer using retrieved data
+        # Generate final answer using retrieved data
         final_answer = generate_final_answer(client, user_query, retrieved_data)
         
         return jsonify({
