@@ -1,0 +1,160 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #fdfdfd;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    max-width: 800px;
+    width: 100%;
+    outline: none;
+}
+
+.container :focus {
+    outline: 2px solid #ffcc00;
+    outline-offset: 2px;
+}
+
+h1 {
+    color: #004d99;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+p {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+#prompt-input {
+    flex-grow: 1;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    resize: vertical;
+}
+
+#submit-button {
+    padding: 10px 20px;
+    background-color: #0066cc;
+    /* Increased contrast */
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    outline: none;
+}
+
+#submit-button:hover:not(:disabled) {
+    background-color: #004999;
+    /* Darker on hover */
+}
+
+#submit-button:disabled {
+    background-color: #777777;
+    /* Sufficient contrast */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+#submit-button:focus {
+    outline: 2px solid #ffcc00;
+    outline-offset: 2px;
+}
+
+#prompt-input:focus {
+    outline: 2px solid #ffcc00;
+    outline-offset: 2px;
+}
+
+/* Output Styling */
+.output-sections section {
+    margin-bottom: 25px;
+    padding: 15px;
+    border-left: 5px solid #004d99;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.output-sections h2 {
+    color: #004d99;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.output-box {
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    /* Preserve line breaks in answers */
+}
+
+.code-box {
+    background-color: #272822;
+    /* Dark background for code */
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.final-answer {
+    background-color: #e6f0ff;
+    border-color: #007bff;
+    font-weight: bold;
+}
+
+/* Loading Indicator */
+.hidden {
+    display: none;
+}
+
+#loading-indicator {
+    text-align: center;
+    margin: 30px 0;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
