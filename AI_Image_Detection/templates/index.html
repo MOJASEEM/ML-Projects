@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔬 AI Image Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 650px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.95em;
+            font-weight: 300;
+        }
+
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        .upload-zone:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border-color: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .upload-zone.dragover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+            border-color: #764ba2;
+            border-width: 3px;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .upload-zone p {
+            color: #666;
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .upload-zone .main-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .upload-zone .sub-text {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        button.secondary {
+            background: #f0f0f0;
+            color: #333;
+            box-shadow: none;
+        }
+
+        button.secondary:hover {
+            background: #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .preview.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 300px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .results {
+            margin-top: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f0f4ff 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-item {
+            margin: 18px 0;
+            font-size: 1em;
+        }
+
+        .result-label {
+            color: #555;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.05em;
+        }
+
+        .prediction-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .badge-ai {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .badge-possibly-ai {
+            background: #ffa500;
+            color: white;
+        }
+
+        .badge-possibly-real {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .badge-real {
+            background: #51cf66;
+            color: white;
+        }
+
+        .confidence-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 12px;
+            margin-top: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .confidence-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 10px;
+        }
+
+        .confidence-percentage {
+            text-align: right;
+            font-size: 0.85em;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        .spinner.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .model-info {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .model-info strong {
+            color: #667eea;
+        }
+
+        .error-message {
+            background: #ffe0e0;
+            color: #d32f2f;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .upload-zone {
+                padding: 35px 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔬 AI Image Detector</h1>
+            <p class="subtitle">Multi-Model Generalization with Explainable AI</p>
+        </div>
+
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📤</div>
+            <p class="main-text">Click to upload or drag & drop</p>
+            <p class="sub-text">PNG, JPG, GIF, BMP, WEBP (Max 16MB)</p>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Preview Section -->
+        <div class="preview" id="preview">
+            <img id="previewImage" class="preview-image" alt="Preview">
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="spinner" id="spinner"></div>
+
+        <!-- Results Section -->
+        <div class="results" id="results">
+            <div class="result-item">
+                <span class="result-label">Prediction</span>
+                <span class="result-value" id="label"></span>
+                <div class="prediction-badge" id="badge"></div>
+            </div>
+
+            <div class="result-item">
+                <span class="result-label">Confidence Score</span>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill"></div>
+                </div>
+                <div class="confidence-percentage"><span id="confidence"></span>%</div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">AI Probability</div>
+                    <div class="stat-value" id="probAI"></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Real Probability</div>
+                    <div class="stat-value" id="probReal"></div>
+                </div>
+            </div>
+
+            <div class="model-info">
+                Model: <strong id="model"></strong> | Device: <strong id="device"></strong>
+            </div>
+        </div>
+
+        <!-- Button Group -->
+        <div class="button-group">
+            <button onclick="document.getElementById('fileInput').click()">📁 Choose Image</button>
+            <button class="secondary" onclick="resetUI()">🔄 Clear</button>
+        </div>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const previewImage = document.getElementById('previewImage');
+        const spinner = document.getElementById('spinner');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            fileInput.files = e.dataTransfer.files;
+            uploadFile();
+        });
+
+        // File selection
+        fileInput.addEventListener('change', uploadFile);
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        function uploadFile() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Validate file size
+            if (file.size > 16 * 1024 * 1024) {
+                showError('File too large. Maximum size: 16MB');
+                return;
+            }
+
+            // Validate file type
+            const validTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showError('Invalid file type. Please use PNG, JPG, GIF, BMP, or WEBP');
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                preview.classList.add('show');
+            };
+            reader.readAsDataURL(file);
+
+            // Show loading
+            spinner.classList.add('show');
+            results.classList.remove('show');
+            errorMessage.classList.remove('show');
+
+            // Send request
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/predict', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    spinner.classList.remove('show');
+
+                    if (data.success) {
+                        displayResults(data.prediction);
+                        results.classList.add('show');
+                    } else {
+                        showError(data.error || 'Prediction failed');
+                    }
+                })
+                .catch(error => {
+                    spinner.classList.remove('show');
+                    showError('Network error: ' + error);
+                    console.error('Error:', error);
+                });
+        }
+
+        function displayResults(prediction) {
+            const score = prediction.score;
+            const confidence = prediction.confidence;
+            const label = prediction.label;
+
+            document.getElementById('label').textContent = label;
+            document.getElementById('confidence').textContent = confidence.toFixed(1);
+            document.getElementById('confidenceFill').style.width = (score * 100) + '%';
+            document.getElementById('probAI').textContent = (prediction.raw_probability_ai * 100).toFixed(1) + '%';
+            document.getElementById('probReal').textContent = (prediction.raw_probability_real * 100).toFixed(1) + '%';
+            document.getElementById('model').textContent = prediction.model_info.model_info.name || 'Hybrid CNN + FFT';
+            document.getElementById('device').textContent = prediction.model_info.device || 'GPU/CPU';
+
+            // Set badge
+            const badge = document.getElementById('badge');
+            if (label.includes('Likely AI')) {
+                badge.textContent = '🤖 AI-Generated';
+                badge.className = 'prediction-badge badge-ai';
+            } else if (label.includes('Possibly AI')) {
+                badge.textContent = '🤔 Possibly AI';
+                badge.className = 'prediction-badge badge-possibly-ai';
+            } else if (label.includes('Possibly Real')) {
+                badge.textContent = '🤔 Possibly Real';
+                badge.className = 'prediction-badge badge-possibly-real';
+            } else {
+                badge.textContent = '📸 Real Photo';
+                badge.className = 'prediction-badge badge-real';
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = '❌ ' + message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        function resetUI() {
+            fileInput.value = '';
+            preview.classList.remove('show');
+            results.classList.remove('show');
+            errorMessage.classList.remove('show');
+            spinner.classList.remove('show');
+            previewImage.src = '';
+        }
+    </script>
+</body>
+</html>
